@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>go9</title>
+	<meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script type="text/javascript"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	
+	<style type="text/css">
+	.away{
+		background-color: transparent;
+    box-shadow: inset 4px 4px 1px 6px #000000, 2px 1px 8px #333333;
+    border: 2px solid rgb(228, 227, 227);
+	}
+	@-webkit-keyframes splash {
+		from {border-color: #fff;}
+		to {border-color: red;}
+	}
+	@-moz-keyframes splash{
+		from {border-color: #fff;}
+		to {border-color: red;}
+	}
+	@-o-keyframes splash{
+		from {border-color: #fff;}
+		to {border-color: red;}
+	}
+	@keyframes splash{
+		from {border-color: #fff;}
+		to {border-color: red;}
+	}
+	.blink{
+		-webkit-animation-name: splash;
+		-webkit-animation-iteration-count: infinite;
+		-webkit-animation-duration: 0.25s;
+		-moz-animation-name: splash;
+		-moz-animation-iteration-count: infinite;
+		-moz-animation-duration: 0.25s;
+		-o-animation-name: splash;
+		-o-animation-iteration-count: infinite;
+		-o-animation-duration: 0.25s;
+		animation-name: splash;
+		animation-iteration-count: infinite;
+		animation-duration: 0.25s;
+	}
+	body{
+		text-align: center;
+	}
+	.bottom{
+	}
+	#bottomGroup{
+		width: 304px;
+		display: inline-flex;
+		flex-flow: row;
+		flex-wrap: wrap;
+	}
+	#gameState{
+		display: inline-flex;
+		flex-flow: row;
+		flex-wrap: nowrap;
+		width: 300px;
+		border: 2px solid #000;
+    box-shadow: 4px 4px 8px #333333;
+	}
+	.home{
+		background-color: transparent;
+    box-shadow: inset 4px 4px 1px 6px rgb(255, 255, 255), 3px 1px 8px #333333;
+    border: 2px solid rgb(228, 227, 227);
+	}
+	#indicator{
+		font-size: 12px;
+		flex: 1 1 10%;
+		float: right;
+		text-align: center;
+		font-weight: bold;
+    height: 46px;
+    border: 2px solid #660d00;
+    box-shadow: inset 0px 0px 0px 3px rgb(255, 243, 243), 4px 4px 8px #333333;
+	}
+	#octoBoard{
+		height: 297px;
+		width: 297px;
+		padding: 1px;
+		border: 2px solid #000;
+		display: inline-flex;
+		flex-flow: row;
+		flex-wrap: wrap;
+		box-shadow: 4px 4px 8px #333333;
+	}
+	.seed{
+		position: absolute;
+		flex: 1 1 15%;
+		padding: 2px;
+	}
+	#seedsBox{
+		flex: 1 1 15%;
+    text-align: center;
+    height: 46px;
+    border: 2px solid #660d00;
+    box-shadow: inset 0px 0px 0px 3px rgb(255, 243, 243), 4px 4px 8px #333333;
+	}
+	.squares{
+		background-color: #fff3f3;
+		flex: 1 1 30%;
+	}
+	.squares:nth-child(even){
+		background-color: #fff;
+	}
+	#startGame{
+		background-color: #ff3030;
+		color: #fff;
+	}
+	.states{
+		cursor: default;
+		flex: 1 1 22%;
+		padding: 5px;
+		text-align: center;
+		font-weight: bold;
+		font-size: 12px;
+	}
+	#status{
+		font-size: 12px;
+		flex: 1 1 70%;
+		float: right;
+		text-align: center;
+		font-weight: bold;
+    height: 46px;
+    border: 2px solid #660d00;
+    box-shadow: inset 0px 0px 0px 3px rgb(255, 243, 243), 4px 4px 8px #333333;
+	}
+	#versus{
+		cursor: default;
+		text-decoration: underline;
+	}
+	#audio{
+		border: 2px solid #000;
+	}
+	</style>
+</head>
+<body>
+<!-- <div id="wrapper"> -->
+	<div id="gameState">
+		<div id="startGame" class="states">START</div>
+		<div id="hm_move" class="states turns">WHITE</div>
+		<div id="aw_move" class="states turns">BLACK</div>
+		<!-- <div id="versus" class="states" title="Click to change">2 P</div> -->
+		<!-- <audio id="audioP" class="states" src="audio/launch.wav">SOUND</audio> -->
+	</div>
+	<br>
+	<div id="bottomGroup">
+		<div id="seedsBox" class="bottom">
+			<div id="home_1" class="seed home"></div>
+			<div id="home_2" class="seed home"></div>
+			<div id="home_3" class="seed home"></div>
+			<div id="away_1" class="seed away"></div>
+			<div id="away_2" class="seed away"></div>
+			<div id="away_3" class="seed away"></div>
+		</div>
+		<div id="status" class="bottom"><br>9Face!</div>
+		<div id="indicator"></div>
+	</div>
+	<br>
+	<br>
+	<div id="octoBoard">
+		<div id="homeBox_1" class="squares"></div>
+		<div id="homeBox_2" class="squares"></div>
+		<div id="homeBox_3" class="squares"></div>
+		<div id="freeBox_1" class="squares"></div>
+		<div id="freeBox_2" class="squares"></div>
+		<div id="freeBox_3" class="squares"></div>
+		<div id="awayBox_1" class="squares"></div>
+		<div id="awayBox_2" class="squares"></div>
+		<div id="awayBox_3" class="squares"></div>
+	</div>
+<!-- </div> --><!-- end wrapper -->
+
+<script>
+	$(document).ready(function(){
+	// new Audio("audio/launch.mp3").play();
+	// alert(("Hello World!").length);
+
+
+// var words = ['','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty'];
+
+	var sq1 = $('#homeBox_1').offset().top+"_"+$('#homeBox_1').offset().left;
+	var sq2 = $('#homeBox_2').offset().top+"_"+$('#homeBox_2').offset().left;
+	var sq3 = $('#homeBox_3').offset().top+"_"+$('#homeBox_3').offset().left;
+	var sq4 = $('#freeBox_1').offset().top+"_"+$('#freeBox_1').offset().left;
+	var sq5 = $('#freeBox_2').offset().top+"_"+$('#freeBox_2').offset().left;
+	var sq6 = $('#freeBox_3').offset().top+"_"+$('#freeBox_3').offset().left;
+	var sq7 = $('#awayBox_1').offset().top+"_"+$('#awayBox_1').offset().left;
+	var sq8 = $('#awayBox_2').offset().top+"_"+$('#awayBox_2').offset().left;
+	var sq9 = $('#awayBox_3').offset().top+"_"+$('#awayBox_3').offset().left;
+
+var wins = [[sq1,sq2,sq3], [sq1,sq4,sq7], [sq1,sq5,sq9], [sq2,sq5,sq8], [sq3,sq5,sq7], [sq3,sq6,sq9], [sq4,sq5,sq6], [sq7,sq8,sq9]];
+
+var fix = [
+	[[sq1,sq2], [sq1,sq3,sq5], [sq2,sq3], [sq1,sq3,sq7], [sq1,sq3,sq9], [sq1,sq4], 
+	[sq1,sq5,sq6], [sq1,sq5,sq7], [sq1,sq5,sq8], [sq1,sq7,sq9], [sq2,sq5,sq7], [sq2,sq5,sq9], 
+	[sq3,sq4,sq5], [sq3,sq5,sq8], [sq3,sq5,sq9], [sq3,sq6], [sq3,sq7,sq9], [sq4,sq5,sq9], 
+	[sq4,sq7], [sq5,sq6,sq7], [sq6,sq9], [sq5,sq7,sq9], [sq7,sq8], [sq8,sq9]],
+
+	[[sq3], [sq2], [sq1], [sq5], [sq5], [sq7], 
+	[sq4,sq9], [sq4], [sq2,sq9], [sq5], [sq3,sq8], [sq1,sq8], 
+	[sq6,sq7], [sq2,sq7], [sq6], [sq9], [sq5], [sq1,sq6], 
+	[sq1], [sq3,sq4], [sq3], [sq8], [sq9], [sq7]]
+];
+//12-3,135-2,137-5,139-5,14-7,156-49,157-4,158-29,179-5,23-1,257-38,259-18,345-67,358-27,359-6,36-9,379-5,459-16,47-1,567-34,579-8,69-3,78-9,89-7
+
+var steps = [
+  [[sq1,sq4],[sq1,sq5],[sq2,sq4],[sq2,sq5],[sq2,sq6],[sq3,sq5],[sq3,sq6],[sq7,sq4],[sq7,sq5],[sq8,sq4],[sq8,sq5],[sq8,sq6],[sq9,sq5],[sq9,sq6]],
+  [[sq8,sq5],[sq9,sq6],[sq7,sq5],[sq7,sq4],[sq9,sq5],[sq7,sq4],[sq8,sq5],[sq2,sq5],[sq3,sq6],[sq1,sq5],[sq3,sq6],[sq3,sq5],[sq1,sq4],[sq2,sq5]]
+];
+
+var $wid = $('.squares').css('width');//width of each square
+var wth = parseInt($wid)/3;//each seed would be a third of the square
+$('.seed').css({'width':wth,'height':wth,'borderRadius':'50%'});//seed is a third of the square
+var dflt = $('.seed').offset();
+var $hm_seed = $('.home');
+var $aw_seed = $('.away');
+var addWid = parseInt($wid)/3.3;//position should start earlier than a third, to make up for padding,border etc
+
+var vs=[], comp=[], step=[];//vs = how many players, comp = the seed left for computer,step = the first move
+$('#versus').click(function(){
+	if ($('#startGame').text()=="START") {//game is not in session
+		$(this).text()=="2 P" ? $(this).text("1 P") : $(this).text("2 P");
+		$('#status').html('<br>'+$(this).text()+"LAYER Selected");
+		new Audio("audio/player.mp3").play();
+	}
+	vs[0] = $(this).text();
+	// alert(vs[0]);
+});
+
+$('#startGame').click(function() {
+	$('#indicator').css('backgroundColor','red');	
+	if ($(this).text() == "START"){//the first click to start a game session
+		new Audio("audio/start.mp3").play();
+		for (var i = 1; i < 4; i++) {
+			var $hm = $('#homeBox_'+[i]).offset();//home_box 1,2 and 3
+			var $aw = $('#awayBox_'+[i]).offset();//away_box 1,2 and 3
+			$('#home_'+[i]).animate({'top':($hm.top+addWid),'left':($hm.left+addWid)},500);//seeds
+			$('#away_'+[i]).animate({'top':($aw.top+addWid),'left':($aw.left+addWid)},500);//seeds
+			$('#homeBox_'+[i]).addClass('active');//squares
+			$('#awayBox_'+[i]).addClass('active');//squares
+		}
+		$('#status').html('<br>Set! Select a seed to start');
+		$(this).text('END');
+	}else{//a click while session has started, reset the game or start a new session
+		$('.seed').css('backgroundColor','transparent').removeClass('blink','ready');//restore seeds' background colors to default
+		$('.squares').removeClass('active');
+		$('.turns').css({'color':'#000','backgroundColor':'#fff'}).removeClass('moveNow');//reset the current player
+		$('.seed').offset(dflt);
+		$('#hm_move').text('WHITE');
+		$('#aw_move').text('BLACK');
+		comp=[],step=[];//empty the arrays
+		$(this).text('START');
+		$('#status').html('<br>Standby');
+	}	
+});
+
+$('.seed').click(function(){//click function would only be triggered by a real player
+	if ($('#startGame').text()=="END") {//start has been clicked
+
+		if ($(this).attr('class').indexOf('home')>-1) {//home seed selected
+			if($('#aw_move').attr('class').indexOf('moveNow')>-1){//but away is already selected
+				return;
+			}else{//home seed selected and can play
+				if(vs[0]=="1 P"){//but the session is for a single player
+					if(comp.length==0){
+						comp.push('away','home');//computer is playing away
+						if($('#hm_move').text() != "COMP") $('#aw_move').text('COMP');
+					}
+				}
+			$('#status').html('<br>WHITE seed selected');
+			$('#hm_move').css({'color':'red','backgroundColor':'yellow'});
+				if($('.moveNow').length==0){
+					$('#hm_move').addClass('moveNow');//set current player to (home), this is the first move
+				}
+			}
+		}
+
+		else{//away seed selected
+			if($('#hm_move').attr('class').indexOf('moveNow')>-1){//but home is already selected
+				return;
+			}else{//away seed selected and can play
+				if(vs[0]=="1 P"){//but the session is for a single player
+					if(comp.length==0){
+						comp.push('home','away');//computer is playing home
+						if($('#aw_move').text() != "COMP") $('#hm_move').text('COMP');
+					}
+				}
+			$('#status').html('<br>BLACK seed selected');
+			$('#aw_move').css({'color':'red','backgroundColor':'yellow'});
+				if($('.moveNow').length==0){
+					$('#aw_move').addClass('moveNow');//set current player to (away), this is the first move
+				}
+			}
+		}
+
+		$('.seed').css('backgroundColor','transparent').removeClass('ready','blink');//reset the seeds' background color
+		$(this).css('backgroundColor','red').addClass('ready');//highlight the selected seed
+		$('#indicator').css('backgroundColor','orange');
+		// alert("Class name: "+$(this).attr('class')+", ID: "+$(this).attr('id'));
+	}else{
+		//do nothing, the game is in standby mode
+	}
+});
+
+$('.squares').click(function(){
+	if($('#startGame').text()=="START"){
+		$('#status').html('<br>Click START!');return;
+	}
+	// alert("{top: "+$(this).offset().top+", left: "+$(this).offset().left+"}");
+	if($('.ready').length>0){//a seed has been clicked
+		var seedPlayed = $('.ready');
+		var $seed = seedPlayed.offset();//seed to move away (only one seed will have this class)
+		var $sqr = $(this).offset();//square to move to. (destination)
+		var sTop = $seed.top-addWid;//var addWid is the value added earlier for alignment purpose
+		var sLeft = $seed.left-addWid;//var addWid is the value added earlier for alignment purpose
+		var bTop = $sqr.top;//move to...
+		var bLeft = $sqr.left;//move to...
+		var bx = $(this);
+
+		//checking if the move is allowable
+		/*sTop==bTop ? //same row
+			$pt = Math.abs(bLeft - sLeft) ://check left offset (column)
+		sLeft==bLeft ? //same column
+			$pt = Math.abs(bTop - sTop) ://check top offset (row)
+		Math.abs(bLeft - sLeft) == 99 && Math.abs(bTop - sTop) == 99 ? //diagonal, and a square away
+			$pt=99 : $pt = 0;*/
+
+		//checking which player made this move
+		if (seedPlayed.attr('class').indexOf('home')>-1) {//home seed selected
+			var cp = "WHITE", nx = "BLACK", now = $('#hm_move'), next = $('#aw_move'), other = "away", sound = "homeMove";
+		}else{//away seed selected
+			var cp = "BLACK", nx = "WHITE", now = $('#aw_move'), next = $('#hm_move'), other = "home", sound = "awayMove";
+		}
+
+		//if($pt==99 && $(this).attr('class').indexOf('active')<0){//legal moves
+		if(canMove(seedPlayed,bx)){
+			//you can move the seed there
+			seedPlayed.css({'top':(bTop+addWid),'left':(bLeft+addWid),'backgroundColor':'#0f0'});//seed moved
+			// if(step.length==0){
+				step.push(1);
+			// }
+			new Audio("audio/"+sound+".mp3").play();
+			$('#indicator').css('backgroundColor','#0f0');
+			$(this).addClass('active');
+			//clearing the just released box (active)
+			for (var i = 1; i < 4; i++) {
+				if (sTop == $('#homeBox_'+i).offset().top && sLeft == $('#homeBox_'+i).offset().left) {//home
+					$('#homeBox_'+i).removeClass('active');
+				}
+				if (sTop == $('#awayBox_'+i).offset().top && sLeft == $('#awayBox_'+i).offset().left) {//away
+					$('#awayBox_'+i).removeClass('active');
+				}
+				if (sTop == $('#freeBox_'+i).offset().top && sLeft == $('#freeBox_'+i).offset().left) {//free
+					$('#freeBox_'+i).removeClass('active');
+				}
+			}
+
+			//let's check for winning
+			var won="",trakH=[],trakA=[];
+				for (var i = 1; i < 8; i++) {//complete winning arrangement array for home
+					var seeded=0,setHome="";
+					for (var it = 1; it < 4; it++) {//check home seeds
+						var $hm = $('#home_'+it).offset();//seed
+						var $arr = ($hm.top-addWid)+"_"+($hm.left-addWid);//minus is for the box, plus is for the seed
+						var cond = wins[i].some(function(item,index,array){
+						return(item==$arr);
+						});
+						if(cond===true){
+							setHome += $arr+",";
+							seeded++;
+						}
+					}
+					if(seeded==2) {trakH.push(setHome);}
+					if (seeded==3) {won = "WHITE",pl = "home";}//only condition to change the value of (won)
+				}
+
+				if (won=="") {//no winning arrangement for home seeds
+					for (var i = 0; i < 7; i++) {//complete winning arrangement array for away
+						var seeded=0,setAway="";
+						for (var it = 1; it < 4; it++) {//check away seeds
+							var $aw = $('#away_'+it).offset();//seed
+							var $arr = ($aw.top-addWid)+"_"+($aw.left-addWid);
+							var cond = wins[i].some(function(item,index,array){
+							return(item==$arr);
+							});
+							if(cond===true){
+								setAway += $arr+",";
+								seeded++;
+							}
+						}
+						if(seeded==2) {trakA.push(setAway);}
+						if (seeded==3) {won = "BLACK",pl="away";}//pl is the player that won
+					}
+				}
+
+			$('.seed').css('backgroundColor','transparent').removeClass('ready');//reset the seeds' background color and ready state
+			//########################################################################################################
+			//if the game has been won
+			//########################################################################################################
+			if(won!==""){
+				$('#status').html('<br>'+won+' won the game!');
+				// new Audio("audio/won.mp3").play();
+				$('.'+pl).addClass('blink');
+				$('#startGame').text("REPLAY");
+				return;
+			}
+			//########################################################################################################
+			//in case the game is not yet won
+			//########################################################################################################
+			$('#status').html('<br>'+cp+' moved. Waiting for '+nx+'...');
+			$('.turns').removeClass('moveNow').css({'color':'#000','backgroundColor':'#fff'});//reset the current player
+			next.addClass('moveNow').css({'color':'red','backgroundColor':'yellow'});//set the next move
+			//########################################################################################################
+
+			// alert(trakA+"\n"+trakH);
+
+			//section for virtual player
+			//########################################################################################################
+			//ARTIFICIAL INTELLIGENCE
+			//########################################################################################################
+			if (next.text()=="COMP") {//if the next player is computer
+				//########################################################################################################
+				//USE GAME STATE TO CONTROL ARTIFICIAL INTELLIGENCE
+				//########################################################################################################
+				var found = 0;
+				if (comp[0]=="home") {var trak1=trakH, trak2=trakA, offs=0,lnt=21;}else{var trak1=trakA, trak2=trakH,offs=3,lnt=24;}
+				if(step.length==1){//counter the opponent's first move of the game
+					// alert(trak2);
+					for (var i = 0; i < steps[0].length; i++) {
+						var mvt = steps[0][i];
+						var from = mvt[0], to = mvt[1];
+						var fTop = parseFloat(from.split("_")[0]),fLeft = parseFloat(from.split("_")[1]);
+						var tTop = parseFloat(to.split("_")[0]),tLeft = parseFloat(to.split("_")[1]);
+						// alert((fT+fL));sTop
+						if (sTop==fTop && sLeft==fLeft && bTop==tTop && bLeft==tLeft) {//movement caught!
+							var ctr = steps[1][i];
+							// alert(ctr);
+							var Here = ctr[0], There = ctr[1];
+							var HTop = parseFloat(Here.split("_")[0]),HLeft = parseFloat(Here.split("_")[1]);
+							var thTop = parseFloat(There.split("_")[0]),thLeft = parseFloat(There.split("_")[1]);//formed into box
+							for (var im = 1; im < 4; im++) {
+								if(found==0){
+									var cSeed = $('#'+comp[0]+"_"+im);//seed 1, for instance
+									var mSeed = cSeed.offset();
+									cStop = mSeed.top - addWid;//changed to the containing box
+									cSleft = mSeed.left - addWid;//changed to the containing box
+									if (cStop==HTop && cSleft==HLeft) {//once any seed com box matches the given box, move the seed. Note: box is given, so we have to check the seed that matches this box
+										cSeed.css({'top':(thTop+addWid),'left':(thLeft+addWid),'backgroundColor':'#0f0'});//game moved
+										found++;
+									}
+
+									// alert("There top: "+thTop+" There left: "+thLeft+"\nHB"+im+" top: "+$('#homeBox_'+im).offset().top+"HB"+im+" left: "+$('#homeBox_'+im).offset().left+"\nAW"+im+" top: "+$('#awayBox_'+im).offset().top+"AW"+im+" left: "+$('#awayBox_'+im).offset().left+"\nFR"+im+" top: "+$('#freeBox_'+im).offset().top+"FR"+im+" left: "+$('#freeBox_'+im).offset().left);
+
+									if (thTop == $('#homeBox_'+im).offset().top && thLeft == $('#homeBox_'+im).offset().left) {//home
+										box = $('#homeBox_'+im);
+									}else
+									if (thTop == $('#freeBox_'+im).offset().top && thLeft == $('#freeBox_'+im).offset().left) {//free
+										box = $('#freeBox_'+im);
+									}else
+									if (thTop == $('#awayBox_'+im).offset().top && thLeft == $('#awayBox_'+im).offset().left) {//away
+										box = $('#awayBox_'+im);
+									}
+								}
+							}
+						}
+					}
+				}/*Work is in progress on this section, it is the advanced section for virtual player
+				else if(step.length>1){//other monitored steps
+					var done1=[], done2=[];
+					for(var iH = 0; iH < trak2.length; iH++){//winning arrangements suspected for human
+						var str1 = trak2[iH].split(",")[0];
+						var str2 = trak2[iH].split(",")[1];
+						done2.push(str1,str2);
+					}
+
+					for(var iC = 0; iC < trak1.length; iC++){//winning arrangements suspected for computer
+						var str1 = trak2[iC].split(",")[0];
+						var str2 = trak2[iC].split(",")[1];
+						done1.push(str1,str2);
+					}
+
+					for (var i = offs; i < lnt; i++) {
+						// fix[i];
+					}
+				}*/
+				else{
+					//checking the game state (comp[0]==cmp).
+					// if (trakH!="") {alert("Home \n1: "+trakH[0]+"\n2: "+trakH[1]);}
+					// if (trakA!="") {alert("Away: "+trakA);}
+
+					//########################################################################################################
+					//THIS BLOCK IS GOOD FOR BEGINNER
+					//########################################################################################################
+					for (var i = 1; i < 4; i++) {//3 seeds
+						for (var iFree = 1; iFree < 4; iFree++) {
+							if(found==0){
+								var seed = $('#'+comp[0]+"_"+i);//seed 1
+								box = $('#freeBox_'+iFree);
+								if(canMove(seed,box)){
+									var mBox = box.offset();
+									var mSeed = seed.offset();
+									seed.css({'top':(mBox.top+addWid),'left':(mBox.left+addWid),'backgroundColor':'#0f0'});//game moved
+									found++;
+								}
+							}
+						}
+					}
+					for (var i = 1; i < 4; i++) {//3 seeds
+						for (var iYou = 1; iYou < 4; iYou++) {
+							if(found==0){
+								var seed = $('#'+comp[0]+"_"+i);//each seed eg "away_1", test it against each box
+								box = $('#'+comp[1]+'Box_'+iYou);
+								if(canMove(seed,box)){
+									var mBox = box.offset();
+									var mSeed = seed.offset();
+									seed.css({'top':(mBox.top+addWid),'left':(mBox.left+addWid),'backgroundColor':'#0f0'});//game moved
+									found++;
+								}
+							}
+						}
+					}
+					for (var i = 1; i < 4; i++) {//3 seeds
+						for (var iMe = 1; iMe < 4; iMe++) {
+							if(found==0){
+								var seed = $('#'+comp[0]+"_"+i);//each seed eg "away_1", test it against each box
+								box = $('#'+comp[0]+'Box_'+iMe);
+								if(canMove(seed,box)){
+									var mBox = box.offset();
+									var mSeed = seed.offset();
+									seed.css({'top':(mBox.top+addWid),'left':(mBox.left+addWid),'backgroundColor':'#0f0'});//game moved
+									found++;
+								}
+							}
+						}
+					}
+				}
+				//########################################################################################################
+				//END BEGINNER BLOCK
+				//########################################################################################################
+				$('#indicator').css('backgroundColor','#0f0');
+
+				//clearing the just released box's (active)
+				for (var ih = 1; ih < 4; ih++) {
+					if ((mSeed.top-addWid) == $('#homeBox_'+ih).offset().top && (mSeed.left-addWid) == $('#homeBox_'+ih).offset().left) {//home
+						$('#homeBox_'+ih).removeClass('active');
+					}
+					if ((mSeed.top-addWid) == $('#awayBox_'+ih).offset().top && (mSeed.left-addWid) == $('#awayBox_'+ih).offset().left) {//away
+						$('#awayBox_'+ih).removeClass('active');
+					}
+					if ((mSeed.top-addWid) == $('#freeBox_'+ih).offset().top && (mSeed.left-addWid) == $('#freeBox_'+ih).offset().left) {//free
+						$('#freeBox_'+ih).removeClass('active');
+					}
+				}
+
+				//updating the destination box to (active)
+				box.addClass('active');
+
+				for (var i = 1; i < 8; i++) {//complete winning arrangement array for home
+					var seeded=0;
+					for (var it = 1; it < 4; it++) {//check home seeds
+						var $hm = $('#home_'+it).offset();//seed
+						var $arr = ($hm.top-addWid)+"_"+($hm.left-addWid);
+						var cond = wins[i].some(function(item,index,array){
+						return(item==$arr);
+						});
+						if(cond===true){
+							seeded++;
+						}
+					}
+					if (seeded==3) {won = "WHITE",pl = "home";}//only condition to change the value of (won)
+				}
+
+				if (won=="") {//no winning arrangement for home seeds
+					for (var i = 0; i < 7; i++) {//complete winning arrangement array for away
+						var seeded=0;
+						for (var it = 1; it < 4; it++) {//check away seeds
+							var $aw = $('#away_'+it).offset();//seed
+							var $arr = ($aw.top-addWid)+"_"+($aw.left-addWid);
+							var cond = wins[i].some(function(item,index,array){
+							return(item==$arr);
+							});
+							if(cond===true){
+								seeded++;
+							}
+						}
+						if (seeded==3) {won = "BLACK",pl="away";}
+					}
+				}
+				//########################################
+				//SAVE THE GAME STATE, NO OF SEEDED PIECES
+				//########################################
+
+				//if the game has been won
+				//################################################
+				if(won!==""){
+					$('#status').html('<br>'+won+' won the game!');
+					// new Audio("audio/won.mp3").play();
+					$('.'+pl).addClass('blink');
+					$('#startGame').text("REPLAY");
+					$('.seed').css('backgroundColor','transparent').removeClass('ready');//reset the seeds' background color and ready state
+					return;
+				}//###############################################
+
+				$('#status').html('<br>'+nx+' moved. Waiting for '+cp+'...');
+				$('.seed').removeClass('ready');//reset the seeds' ready state
+				$('.turns').removeClass('moveNow').css({'color':'#000','backgroundColor':'#fff'});//reset the current player
+				now.addClass('moveNow').css({'color':'red','backgroundColor':'yellow'});//set the next move
+			}
+			//virtual player ends
+			//end of legal move block
+		}else{//the square is already occupied or too far
+			$('#status').html('<br>Illegal move!');
+			new Audio("audio/error.mp3").play();
+		}
+	}else{//No seed selected
+		if ($('.blink').length == 0){
+			$('#status').html('<br>Select a seed to continue');
+			new Audio("audio/error.mp3").play();
+		}
+	}
+});
+
+function canMove(seed,box) {//if this seed can move into that box
+	stop = seed.offset().top - addWid;//changed to the containing box
+	sleft = seed.offset().left - addWid;//changed to the containing box
+	btop = box.offset().top;
+	bleft = box.offset().left;
+
+	if(stop==btop){dst = Math.abs(bleft - sleft);}
+	else if(sleft==bleft){dst = Math.abs(btop - stop);}
+	else if(Math.abs(bleft - sleft) == 99 && Math.abs(btop - stop) == 99){dst=99;}
+	else{dst = 0;}
+
+	if(dst==99 && box.attr('class').indexOf('active')<0){
+		return true;
+	}else return false;
+}
+
+
+
+
+
+
+
+
+
+
+	});
+</script>
+</body>
+</html>
